@@ -21,32 +21,39 @@
 -type msgpack_map() :: msgpack_map_jsx() | msgpack_map_jiffy() | map().
 
 -type msgpack_map_unpacker() ::
-        fun((binary(), non_neg_integer(), msgpack:opt_record()) ->
-                   {msgpack_map(), binary()} | no_return() ).
+    fun((binary(), non_neg_integer(), msgpack:opt_record()) -> {msgpack_map(), binary()} | no_return()).
 
 %% Erlang representation of msgpack data.
--type msgpack_term() :: [msgpack_term()] | msgpack_map() |
-                        integer() | float() | boolean() | binary() | string() | {string, string()}.
+-type msgpack_term() ::
+    [msgpack_term()]
+    | msgpack_map()
+    | integer()
+    | float()
+    | boolean()
+    | binary()
+    | string()
+    | {string, string()}.
 
 %% jiffy, jsx would be soon deprecated as the map is now primitive type.
--type format_type() :: jsx|jiffy|map.
+-type format_type() :: jsx | jiffy | map.
 
 -define(DEFAULT_MAP_FORMAT, map).
 -define(DEFAULT_MAP_UNPACKER_FUN, fun msgpack_unpacker:unpack_map/3).
 
 -record(options_v4, {
-          spec = new :: new | old,
-          allow_atom = pack  :: none | pack, %% allows atom when packing
-          known_atoms = [] :: [atom()|binary()],
-          unpack_str = as_list :: as_binary | as_list | as_tagged_list,
-          use_nil = false :: boolean(),
-          validate_string = false :: boolean(),
-          pack_str = from_list :: from_binary | from_list | from_tagged_list | none,
-          map_format = ?DEFAULT_MAP_FORMAT :: format_type(),
-          map_unpack_fun = ?DEFAULT_MAP_UNPACKER_FUN :: msgpack_map_unpacker(),
-          ext_packer = undefined   :: msgpack:ext_packer()   | undefined,
-          ext_unpacker = undefined :: msgpack:ext_unpacker() | undefined,
-          original_list = []       :: msgpack:options()
-         }).
+    spec = new :: new | old,
+    %% allows atom when packing
+    allow_atom = pack :: none | pack,
+    known_atoms = [] :: [atom() | binary()],
+    unpack_str = as_list :: as_binary | as_list | as_tagged_list,
+    use_nil = false :: boolean(),
+    validate_string = false :: boolean(),
+    pack_str = from_list :: from_binary | from_list | from_tagged_list | none,
+    map_format = ?DEFAULT_MAP_FORMAT :: format_type(),
+    map_unpack_fun = ?DEFAULT_MAP_UNPACKER_FUN :: msgpack_map_unpacker(),
+    ext_packer = undefined :: msgpack:ext_packer() | undefined,
+    ext_unpacker = undefined :: msgpack:ext_unpacker() | undefined,
+    original_list = [] :: msgpack:options()
+}).
 
 -define(OPTION, #options_v4).

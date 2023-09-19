@@ -21,10 +21,10 @@
 %% @doc identity constraint
 %% {ok, {Type, Data} = msgpack_ext_module:pack_ext(Tuple, [{ext, msgpack_ext_module}]),
 %% {ok, Tuple} = msgpack_ext_module:unpack_ext(Type, Data)
-%% 
+%%
 -callback pack_ext(any(), msgpack:options()) ->
-    {ok, {Type::byte(), Data::binary()}} |
-    {error, any()}.
+    {ok, {Type :: byte(), Data :: binary()}}
+    | {error, any()}.
 
--callback unpack_ext(Type::byte(), Data::binary(), msgpack:options()) ->
+-callback unpack_ext(Type :: byte(), Data :: binary(), msgpack:options()) ->
     {ok, any()} | {error, any()}.

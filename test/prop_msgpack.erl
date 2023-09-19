@@ -17,7 +17,6 @@
 -include_lib("proper/include/proper.hrl").
 -include("msgpack.hrl").
 
-
 %% -define(NUMTESTS, 16).
 %% -define(QC_OUT(P),
 %%         eqc:on_output(fun(Str, Args) ->
@@ -37,72 +36,82 @@
 %%% Primitive Properties %%%
 prop_uint() ->
     ?FORALL(
-       {UnsignedInt, Opts},
-       {oneof([positive_fixnum(), uint8(), uint16(), uint32(), uint64()]),
-        stable_opts()},
-       pack_and_unpack(UnsignedInt, Opts)).
+        {UnsignedInt, Opts},
+        {oneof([positive_fixnum(), uint8(), uint16(), uint32(), uint64()]), stable_opts()},
+        pack_and_unpack(UnsignedInt, Opts)
+    ).
 
 prop_int() ->
     ?FORALL(
-       {Int, Opts},
-       {oneof([positive_fixnum(), negative_fixnum(), int8(), int16(), int32(), int64()]),
-        stable_opts()},
-       pack_and_unpack(Int, Opts)).
+        {Int, Opts},
+        {oneof([positive_fixnum(), negative_fixnum(), int8(), int16(), int32(), int64()]), stable_opts()},
+        pack_and_unpack(Int, Opts)
+    ).
 
 prop_binary() ->
     ?FORALL(
-       {Binary, Opts},
-       {oneof([fix_raw(), raw16(), raw32()]), stable_opts()},
-       pack_and_unpack(Binary, Opts)).
+        {Binary, Opts},
+        {oneof([fix_raw(), raw16(), raw32()]), stable_opts()},
+        pack_and_unpack(Binary, Opts)
+    ).
 
 prop_float() ->
     ?FORALL(
-       Float,
-       proper_types:float(),
-       pack_and_unpack(Float, [])).
+        Float,
+        proper_types:float(),
+        pack_and_unpack(Float, [])
+    ).
 
 prop_primitive() ->
     ?FORALL(
-       {PrimObj, Opts},
-       {oneof(primitive_types()), stable_opts()},
-       pack_and_unpack(PrimObj, Opts)).
+        {PrimObj, Opts},
+        {oneof(primitive_types()), stable_opts()},
+        pack_and_unpack(PrimObj, Opts)
+    ).
 
 prop_array_primitive() ->
     ?FORALL(
-       {Array, Opts},
-       {oneof([fix_array_primitive(), array16_primitive()]), stable_opts()},
-       pack_and_unpack(Array, Opts)).
+        {Array, Opts},
+        {oneof([fix_array_primitive(), array16_primitive()]), stable_opts()},
+        pack_and_unpack(Array, Opts)
+    ).
 
 prop_map_primitive() ->
     ?FORALL(
-       {Map, Opts},
-       {oneof([fix_map_primitive(), map16_primitive()]), stable_opts()},
-       pack_and_unpack(Map, Opts)).
+        {Map, Opts},
+        {oneof([fix_map_primitive(), map16_primitive()]), stable_opts()},
+        pack_and_unpack(Map, Opts)
+    ).
 
 prop_msgpack() ->
-    ?FORALL({Obj, Opts},
-            {msgpack_object(), stable_opts()},
-            pack_and_unpack(Obj, Opts)).
+    ?FORALL(
+        {Obj, Opts},
+        {msgpack_object(), stable_opts()},
+        pack_and_unpack(Obj, Opts)
+    ).
 
 prop_string() ->
-    ?FORALL({Str, Opts},
-            {utf8(),
-             oneof(
-               [
-                [],
-                [{unpack_str, as_list},{pack_str, from_list},{validate_string,true}],
-                [{unpack_str, as_binary},{pack_str, from_binary},{validate_string,true}],
-                [{unpack_str, as_tagged_list},{pack_str, from_tagged_list},{validate_string,true}]
-               ])},
-            pack_and_unpack(unicode:characters_to_list(Str), Opts)).
-
+    ?FORALL(
+        {Str, Opts},
+        {
+            utf8(),
+            oneof(
+                [
+                    [],
+                    [{unpack_str, as_list}, {pack_str, from_list}, {validate_string, true}],
+                    [{unpack_str, as_binary}, {pack_str, from_binary}, {validate_string, true}],
+                    [{unpack_str, as_tagged_list}, {pack_str, from_tagged_list}, {validate_string, true}]
+                ]
+            )
+        },
+        pack_and_unpack(unicode:characters_to_list(Str), Opts)
+    ).
 
 %%% Helpers %%%
 pack_and_unpack(Obj, Opts) ->
     Bin = msgpack:pack(Obj, Opts),
     {ok, Obj} = msgpack:unpack(Bin, Opts),
     is_binary(Bin).
-
 
 %%% Generators %%%
 stable_opts() ->
@@ -114,44 +123,72 @@ null() -> null.
 positive_fixnum() -> choose(0, 127).
 negative_fixnum() -> choose(-32, -1).
 
-int8() ->  choose(-16#80, 16#7F).
-int16() -> oneof([choose(-16#8000, -16#81),
-                  choose(16#80, 16#7FFF)]).
-int32() -> oneof([choose(-16#80000000, -16#8001),
-                  choose(16#10000, 16#7FFFFFFF)]).
-int64() -> oneof([choose(-16#8000000000000000, -16#80000001),
-                  choose(16#100000000, 16#7FFFFFFFFFFFFFFF)]).
+int8() -> choose(-16#80, 16#7F).
+int16() ->
+    oneof([
+        choose(-16#8000, -16#81),
+        choose(16#80, 16#7FFF)
+    ]).
+int32() ->
+    oneof([
+        choose(-16#80000000, -16#8001),
+        choose(16#10000, 16#7FFFFFFF)
+    ]).
+int64() ->
+    oneof([
+        choose(-16#8000000000000000, -16#80000001),
+        choose(16#100000000, 16#7FFFFFFFFFFFFFFF)
+    ]).
 
-uint8() ->  choose(0, 16#FF).
+uint8() -> choose(0, 16#FF).
 uint16() -> choose(16#100, 16#FFFF).
 uint32() -> choose(16#10000, 16#FFFFFFFF).
 uint64() -> choose(16#100000000, 16#FFFFFFFFFFFFFFFF).
 
 fix_raw() ->
-    ?LET(Integer, choose(0, 31),
-         ?LET(Binary, binary(Integer), Binary)).
+    ?LET(
+        Integer,
+        choose(0, 31),
+        ?LET(Binary, binary(Integer), Binary)
+    ).
 
 raw16() ->
-    ?LET(Integer, uint16(),
-         ?LET(Binary, binary(Integer), Binary)).
+    ?LET(
+        Integer,
+        uint16(),
+        ?LET(Binary, binary(Integer), Binary)
+    ).
 
 raw32() ->
     ?LET(Binary, binary(65537), Binary).
 
 primitive_types() ->
     [
-     null(),
-     positive_fixnum(), negative_fixnum(),
-     int8(), int16(), int32(), int64(),
-     uint8(), uint16(), uint32(), uint64(),
-     proper_types:float(), proper_types:bool(),
-     fix_raw(), raw16(), raw32()
+        null(),
+        positive_fixnum(),
+        negative_fixnum(),
+        int8(),
+        int16(),
+        int32(),
+        int64(),
+        uint8(),
+        uint16(),
+        uint32(),
+        uint64(),
+        proper_types:float(),
+        proper_types:bool(),
+        fix_raw(),
+        raw16(),
+        raw32()
     ].
 
-
 container_types() ->
-    [ fix_array_primitive(), array16_primitive(),
-      fix_map_primitive(), map16_primitive() ].
+    [
+        fix_array_primitive(),
+        array16_primitive(),
+        fix_map_primitive(),
+        map16_primitive()
+    ].
 
 fix_array_primitive() ->
     %% up to 2^4-1
@@ -166,18 +203,24 @@ array16_primitive() ->
 fix_map_primitive() ->
     %% up to 2^4-1
     %% TODO: check the first 4 bits be 1000
-    resize(15,
-           proper_types:map(
-             oneof(primitive_types()),
-             oneof(primitive_types()))).
+    resize(
+        15,
+        proper_types:map(
+            oneof(primitive_types()),
+            oneof(primitive_types())
+        )
+    ).
 
 map16_primitive() ->
     %% Up to 2^16-1, but for performance
     %% TODO: check the first byte be 0xde (so s 0xdf for map32)
-    resize(128,
-           proper_types:map(
-             oneof(primitive_types()),
-             oneof(primitive_types()))).
+    resize(
+        128,
+        proper_types:map(
+            oneof(primitive_types()),
+            oneof(primitive_types())
+        )
+    ).
 
 %% TODO: add map
 msgpack_object() ->

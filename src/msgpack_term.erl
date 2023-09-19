@@ -17,14 +17,18 @@
 %%
 -module(msgpack_term).
 
--export([to_binary/1, from_binary/2,
-         pack_ext/2, unpack_ext/3]).
+-export([
+    to_binary/1,
+    from_binary/2,
+    pack_ext/2,
+    unpack_ext/3
+]).
 -behaviour(msgpack_ext).
 
 -include_lib("eunit/include/eunit.hrl").
 
 -define(ERLANG_TERM, 127).
--define(TERM_OPTION, [{spec,new},{ext,?MODULE},{allow_atom,none}]).
+-define(TERM_OPTION, [{spec, new}, {ext, ?MODULE}, {allow_atom, none}]).
 
 %% @doc experimental
 -spec to_binary(term()) -> binary().
@@ -32,7 +36,7 @@ to_binary(Term) ->
     msgpack:pack(Term, ?TERM_OPTION).
 
 %% @doc experimental
--spec from_binary(binary(), []|[safe]) -> term().
+-spec from_binary(binary(), [] | [safe]) -> term().
 from_binary(Bin, Opt) ->
     case msgpack:unpack(Bin, Opt ++ ?TERM_OPTION) of
         {ok, Term} -> Term;
@@ -40,8 +44,8 @@ from_binary(Bin, Opt) ->
     end.
 
 -spec pack_ext(tuple(), msgpack:options()) ->
-                      {ok, {Type::byte(), Data::binary()}} |
-                      {error, any()}.
+    {ok, {Type :: byte(), Data :: binary()}}
+    | {error, any()}.
 pack_ext(Term, _Options) ->
     %% there are still much space to improve:
     %% for example, pid() can be compressed much
@@ -54,7 +58,7 @@ pack_ext(Term, _Options) ->
     %% coded as single byte indicating its length.
     {ok, {?ERLANG_TERM, erlang:term_to_binary(Term)}}.
 
--spec unpack_ext(Type::byte(), Data::binary(), msgpack:options()) ->
+-spec unpack_ext(Type :: byte(), Data :: binary(), msgpack:options()) ->
     {ok, any()} | {error, any()}.
 unpack_ext(?ERLANG_TERM, Bin, Opt) ->
     case proplists:get_value(safe, Opt) of
@@ -68,13 +72,21 @@ unpack_ext(?ERLANG_TERM, Bin, Opt) ->
 -include_lib("eunit/include/eunit.hrl").
 
 test_data() ->
-    ['foobar atom', %% is_atom/1
-     fun() -> ok end, %% is_function/1
-     self(), %% is_pid/1
-     %% is_port/1
-     make_ref(), %% is_reference/1
-     {me, foo, bar}, %% is_tuple/1
-     {}].
+    %% is_atom/1
+    [
+        'foobar atom',
+        %% is_function/1
+        fun() -> ok end,
+        %% is_pid/1
+        self(),
+        %% is_port/1
+
+        %% is_reference/1
+        make_ref(),
+        %% is_tuple/1
+        {me, foo, bar},
+        {}
+    ].
 
 t2b_b2t_test() ->
     Data = test_data(),
